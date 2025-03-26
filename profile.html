@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .navbar {
+            background-color: #4CAF50;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+      <a href="upload.html">Upload</a>
+        <a href="history.html">History</a>
+        <a href="profile.html">Profile</a>
+        <a href="farm.html">Farm</a>
+        <a href="hive_management.html">Hive</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+
+    <div class="container">
+        <h1>Profile Page</h1>
+        
+        <label for="email">email (Uneditable)</label>
+        <input type="text" id="email" disabled>
+        
+        <label for="fullname">Full Name</label>
+        <input type="text" id="fullname" placeholder="Enter full name">
+
+        <label for="country">Country</label>
+        <select id="country">
+            <option value="">Select Country</option>
+            <option value="USA">USA</option>
+            <option value="UK">UK</option>
+            <option value="Canada">Canada</option>
+            <option value="Pakistan">Pakistan</option>
+            <option value="India">India</option>
+            <option value="Germany">Germany</option>
+            <option value="France">France</option>
+            <option value="China">China</option>
+            <option value="Japan">Japan</option>
+            <option value="Australia">Australia</option>
+        </select>
+
+        <label for="city">City</label>
+        <input type="text" id="city" placeholder="Enter city">
+
+        <label for="gender">Gender</label>
+        <select id="gender">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="phone_number">Phone Number</label>
+        <input type="text" id="phone_number" placeholder="Enter phone number">
+
+        <button onclick="saveProfile()">Save</button>
+    </div>
+
+    <script>
+        const API_URL = "https://bilalhasanniazi-bee-notbee.hf.space";
+
+        async function loadProfile() {
+            const userId = localStorage.getItem("user_id");
+            if (!userId) {
+                alert("Not logged in!");
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/profile?user_id=${userId}`);
+            const user = await response.json();
+
+            document.getElementById("email").value = user.email;
+            document.getElementById("fullname").value = user.fullname || "";
+            document.getElementById("country").value = user.country || "";
+            document.getElementById("city").value = user.city || "";
+            document.getElementById("gender").value = user.gender || "";
+            document.getElementById("phone_number").value = user.phone_number || "";
+        }
+
+        async function saveProfile() {
+            const userId = localStorage.getItem("user_id");
+            if (!userId) {
+                alert("Not logged in!");
+                return;
+            }
+
+            const profileData = {
+                user_id: userId,
+                fullname: document.getElementById("fullname").value,
+                country: document.getElementById("country").value,
+                city: document.getElementById("city").value,
+                gender: document.getElementById("gender").value,
+                phone_number: document.getElementById("phone_number").value
+            };
+
+            const response = await fetch(`${API_URL}/profile/update`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(profileData)
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        }
+
+        loadProfile();
+    </script>
+
+</body>
+</html>
