@@ -27,12 +27,13 @@
             color: #4CAF50;
         }
 
-        input, button {
+        input, button, select {
             width: 90%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
         }
 
         button {
@@ -72,7 +73,10 @@
     <div class="container">
         <h1>Upload Audio</h1>
         <form id="predictForm" onsubmit="predict(event)">
-            <input type="file" id="audio" accept="audio/*" required><br>
+            <input type="file" id="audio" accept="audio/*" required>
+            <select id="hiveSelect">
+                <option value="">Select Hive (Optional)</option>
+            </select>
             <button type="submit">Upload and Check</button>
         </form>
         <div id="result"></div>
@@ -81,23 +85,82 @@
     <script>
         const API_URL = "https://bilalhasanniazi-bee-notbee.hf.space";
 
+        async function loadHives() {
+            const userId = localStorage.getItem("user_id");
+            if (!userId) {
+                console.error("Not logged in!");
+                return;
+            }
+
+            try {
+                const farmResponse = await fetch(`${API_URL}/farm?user_id=${userId}`);
+                const farmData = await farmResponse.json();
+
+                if (!farmData || farmData.error) {
+                    console.error("No farm found for user.");
+                    return;
+                }
+
+                const farmId = farmData.farm_id;
+                if (!farmId) {
+                    console.error("No farm ID available.");
+                    return;
+                }
+
+                const hivesResponse = await fetch(`${API_URL}/hives?farm_id=${farmId}`);
+                const hives = await hivesResponse.json();
+
+                const hiveSelect = document.getElementById("hiveSelect");
+                hiveSelect.innerHTML = '<option value="">Select Hive (Optional)</option>';
+
+                if (hives && !hives.error) {
+                    hives.forEach(hive => {
+                        const option = document.createElement("option");
+                        option.value = hive.hive_id;
+                        option.textContent = `Hive ${hive.hive_number}`;
+                        hiveSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading hives:", error);
+            }
+        }
+
         async function predict(event) {
             event.preventDefault();
             const userId = localStorage.getItem("user_id");
             const audio = document.getElementById("audio").files[0];
+            const hiveId = document.getElementById("hiveSelect").value;
+
+            if (!userId) {
+                document.getElementById("result").innerText = "Please log in to upload audio.";
+                return;
+            }
+
             const formData = new FormData();
             formData.append("audio", audio);
             formData.append("user_id", userId);
+            if (hiveId) {
+                formData.append("hive_id", hiveId);
+            }
 
-            const response = await fetch(`${API_URL}/predict`, { method: "POST", body: formData });
-            const result = await response.json();
-            document.getElementById("result").innerText = `Result: ${result.result}`;
+            try {
+                const response = await fetch(`${API_URL}/predict`, { method: "POST", body: formData });
+                const result = await response.json();
+                document.getElementById("result").innerText = `Result: ${result.result}`;
+            } catch (error) {
+                console.error("Error uploading audio:", error);
+                document.getElementById("result").innerText = "Error uploading audio. Please try again.";
+            }
         }
 
         function logout() {
             localStorage.removeItem("user_id");
             window.location.href = "login.html";
         }
+
+        // Load hives when the page loads
+        loadHives();
     </script>
 </body>
 </html>
