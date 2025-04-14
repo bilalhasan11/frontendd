@@ -54,11 +54,11 @@
             border-radius: 5px;
             text-align: center;
             font-size: 18px;
-            cursor: pointer; /* Indicates clickable */
+            cursor: pointer;
         }
 
         li:hover {
-            background: #d0d0d0; /* Hover effect */
+            background: #d0d0d0;
         }
 
         .hidden {
@@ -70,6 +70,82 @@
             font-weight: bold;
             text-align: center;
             margin-top: 20px;
+        }
+
+        .add-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .add-button:hover {
+            background-color: #45a049;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        .modal-content label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        .modal-content input,
+        .modal-content select,
+        .modal-content textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .modal-content button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .modal-content button:hover {
+            background-color: #45a049;
+        }
+
+        .close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -86,8 +162,43 @@
 
     <div class="container">
         <h1>Hive Management</h1>
+        <button class="add-button" onclick="openAddHiveModal()">Add Hive</button>
         <p class="warning hidden" id="noFarmWarning">You need to register a farm first! <a href="farm.html">Register Farm</a></p>
         <ul id="hiveList"></ul>
+    </div>
+
+    <div id="addHiveModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddHiveModal()">×</span>
+            <h2>Add New Hive</h2>
+            <label for="hiveNumber">Hive Number:</label>
+            <input type="number" id="hiveNumber" min="1" required>
+            
+            <label for="beeType">Bee Type:</label>
+            <select id="beeType" required>
+                <option value="" disabled selected>Select Bee Type</option>
+                <option value="Italian">Italian</option>
+                <option value="Carniolan">Carniolan</option>
+                <option value="Caucasian">Caucasian</option>
+                <option value="Buckfast">Buckfast</option>
+            </select>
+            
+            <label for="numFrames">Number of Frames:</label>
+            <input type="number" id="numFrames" min="1" required>
+            
+            <label for="healthStatus">Health Status:</label>
+            <select id="healthStatus" required>
+                <option value="" disabled selected>Select Health Status</option>
+                <option value="Healthy">Healthy</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Critical">Critical</option>
+            </select>
+            
+            <label for="notes">Notes:</label>
+            <textarea id="notes" rows="4"></textarea>
+            
+            <button onclick="addHive()">Add Hive</button>
+        </div>
     </div>
 
     <script>
@@ -101,7 +212,6 @@
             }
 
             try {
-                // Fetch farm details using /api/farm
                 const farmResponse = await fetch(`${API_URL}/farm?user_id=${userId}`);
                 const farmData = await farmResponse.json();
 
@@ -116,7 +226,6 @@
                     return;
                 }
 
-                // Fetch hives using /api/hives with farm_id
                 const hivesResponse = await fetch(`${API_URL}/hives?farm_id=${farmId}`);
                 const hives = await hivesResponse.json();
 
@@ -126,14 +235,13 @@
                     return;
                 }
 
-                // Populate the hive list with clickable items
                 const hiveList = document.getElementById("hiveList");
                 hiveList.innerHTML = "";
 
                 hives.forEach(hive => {
                     const li = document.createElement("li");
-                    li.textContent = `Hive ${hive.hive_number}`; // Display hive_number
-                    li.dataset.hiveId = hive.hive_id; // Store hive_id in data attribute
+                    li.textContent = `Hive ${hive.hive_number}`;
+                    li.dataset.hiveId = hive.hive_id;
                     li.addEventListener("click", () => {
                         window.location.href = `hive_details.html?hive_id=${hive.hive_id}`;
                     });
@@ -142,6 +250,76 @@
             } catch (error) {
                 console.error("Error loading hives:", error);
                 document.getElementById("hiveList").innerHTML = "<li>Error loading hives. Please try again later.</li>";
+            }
+        }
+
+        function openAddHiveModal() {
+            document.getElementById("addHiveModal").style.display = "flex";
+        }
+
+        function closeAddHiveModal() {
+            document.getElementById("addHiveModal").style.display = "none";
+            document.getElementById("hiveNumber").value = "";
+            document.getElementById("beeType").value = "";
+            document.getElementById("numFrames").value = "";
+            document.getElementById("healthStatus").value = "";
+            document.getElementById("notes").value = "";
+        }
+
+        async function addHive() {
+            const hiveNumber = document.getElementById("hiveNumber").value;
+            const beeType = document.getElementById("beeType").value;
+            const numFrames = document.getElementById("numFrames").value;
+            const healthStatus = document.getElementById("healthStatus").value;
+            const notes = document.getElementById("notes").value;
+
+            if (!hiveNumber || !beeType || !numFrames || !healthStatus) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+
+            try {
+                const userId = localStorage.getItem("user_id");
+                const farmResponse = await fetch(`${API_URL}/farm?user_id=${userId}`);
+                const farmData = await farmResponse.json();
+                const farmId = farmData.farm_id;
+
+                if (!farmId) {
+                    alert("No farm registered. Please register a farm first.");
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/hives`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        farm_id: farmId,
+                        hive_number: parseInt(hiveNumber),
+                        bee_type: beeType,
+                        number_of_frames: parseInt(numFrames),
+                        health_status: healthStatus,
+                        notes: notes
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const hiveList = document.getElementById("hiveList");
+                    const li = document.createElement("li");
+                    li.textContent = `Hive ${hiveNumber}`;
+                    li.dataset.hiveId = result.hive_id;
+                    li.addEventListener("click", () => {
+                        window.location.href = `hive_details.html?hive_id=${result.hive_id}`;
+                    });
+                    hiveList.appendChild(li);
+
+                    closeAddHiveModal();
+                } else {
+                    alert("Failed to add hive: " + (result.error || "Unknown error"));
+                }
+            } catch (error) {
+                console.error("Error adding hive:", error);
+                alert("Error adding hive. Please try again later.");
             }
         }
 
