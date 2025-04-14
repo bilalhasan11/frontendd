@@ -81,10 +81,31 @@
             background-color: #45a049;
         }
 
+        .delete-button {
+            display: inline-block;
+            margin-top: 20px;
+            margin-left: 10px;
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+
         .error {
             color: red;
             text-align: center;
             margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -103,6 +124,7 @@
         <h1>Hive Details</h1>
         <div id="hiveDetails" class="details-card"></div>
         <a href="hive_management.html" class="back-button">Back to Hive List</a>
+        <button class="delete-button" onclick="confirmDeleteHive()">Delete Hive</button>
         <p id="errorMessage" class="error hidden"></p>
     </div>
 
@@ -110,7 +132,6 @@
         const API_URL = "https://bilalhasanniazi-bee-notbee.hf.space";
 
         async function loadHiveDetails() {
-            // Get hive_id from URL query parameter
             const urlParams = new URLSearchParams(window.location.search);
             const hiveId = urlParams.get("hive_id");
 
@@ -120,7 +141,6 @@
             }
 
             try {
-                // Fetch hive details using hive_id
                 const response = await fetch(`${API_URL}/hive_detail?hive_id=${hiveId}`);
                 const hive = await response.json();
 
@@ -129,7 +149,6 @@
                     return;
                 }
 
-                // Display hive details
                 const hiveDetails = document.getElementById("hiveDetails");
                 hiveDetails.innerHTML = `
                     <p><strong>Hive Number:</strong> ${hive.hive_number}</p>
@@ -145,20 +164,47 @@
             }
         }
 
-        // Helper function to determine health status class
         function getHealthClass(status) {
             if (!status) return "unknown";
             return status.toLowerCase() === "healthy" ? "healthy" : status.toLowerCase() === "unhealthy" ? "unhealthy" : "unknown";
         }
 
-        // Helper function to display error messages
         function displayError(message) {
             const errorMessage = document.getElementById("errorMessage");
             errorMessage.textContent = message;
             errorMessage.classList.remove("hidden");
         }
 
-        // Load hive details when the page loads
+        async function confirmDeleteHive() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hiveId = urlParams.get("hive_id");
+
+            if (!hiveId) {
+                displayError("No hive ID provided.");
+                return;
+            }
+
+            if (confirm("Are you sure you want to delete this hive? This action cannot be undone.")) {
+                try {
+                    const response = await fetch(`${API_URL}/hives?hive_id=${hiveId}`, {
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" }
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert("Hive deleted successfully.");
+                        window.location.href = "hive_management.html";
+                    } else {
+                        displayError("Failed to delete hive: " + (result.error || "Unknown error"));
+                    }
+                } catch (error) {
+                    console.error("Error deleting hive:", error);
+                    displayError("Error deleting hive. Please try again later.");
+                }
+            }
+        }
+
         loadHiveDetails();
 
         function logout() {
