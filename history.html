@@ -15,7 +15,7 @@
 
         .container {
             width: 90%;
-            max-width: 400px;
+            max-width: 600px;
             margin: 50px auto;
             background: white;
             padding: 20px;
@@ -90,6 +90,7 @@
             <thead>
                 <tr>
                     <th>Timestamp</th>
+                    <th>Hive Number</th>
                     <th>Audio Name</th>
                     <th>Result</th>
                 </tr>
@@ -103,12 +104,28 @@
 
         async function fetchHistory() {
             const userId = localStorage.getItem("user_id");
-            const response = await fetch(`${API_URL}/history?user_id=${userId}`);
-            const data = await response.json();
-            
-            document.getElementById("historyBody").innerHTML = data.history.map(entry =>
-                `<tr><td>${entry.timestamp}</td><td>${entry.audio_name}</td><td>${entry.result}</td></tr>`
-            ).join("");
+            if (!userId) {
+                alert("Please log in to view history.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/history?user_id=${userId}`);
+                const data = await response.json();
+                
+                document.getElementById("historyBody").innerHTML = data.history.map(entry =>
+                    `<tr>
+                        <td>${entry.timestamp}</td>
+                        <td>${entry.hive_number !== null ? entry.hive_number : 'N/A'}</td>
+                        <td>${entry.audio_name}</td>
+                        <td>${entry.result}</td>
+                    </tr>`
+                ).join("");
+            } catch (error) {
+                console.error("Error fetching history:", error);
+                document.getElementById("historyBody").innerHTML = "<tr><td colspan='4'>Error loading history. Please try again.</td></tr>";
+            }
         }
 
         function logout() {
