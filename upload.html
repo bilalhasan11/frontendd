@@ -77,6 +77,13 @@
             <select id="hiveSelect">
                 <option value="">Select Hive (Optional)</option>
             </select>
+            <select id="userPredict" required>
+                <option value="" disabled selected>Select Your Prediction</option>
+                <option value="Healthy">Healthy</option>
+                <option value="Mite">Mite</option>
+                <option value="No Queen">No Queen</option>
+                <option value="Brood">Brood</option>
+            </select>
             <button type="submit">Upload and Check</button>
         </form>
         <div id="result"></div>
@@ -101,13 +108,7 @@
                     return;
                 }
 
-                const farmId = farmData.farm_id;
-                if (!farmId) {
-                    console.error("No farm ID available.");
-                    return;
-                }
-
-                const hivesResponse = await fetch(`${API_URL}/hives?farm_id=${farmId}`);
+                const hivesResponse = await fetch(`${API_URL}/hives?user_id=${userId}`);
                 const hives = await hivesResponse.json();
 
                 const hiveSelect = document.getElementById("hiveSelect");
@@ -131,15 +132,22 @@
             const userId = localStorage.getItem("user_id");
             const audio = document.getElementById("audio").files[0];
             const hiveId = document.getElementById("hiveSelect").value;
+            const userPredict = document.getElementById("userPredict").value;
 
             if (!userId) {
                 document.getElementById("result").innerText = "Please log in to upload audio.";
                 return;
             }
 
+            if (!userPredict) {
+                document.getElementById("result").innerText = "Please select your prediction.";
+                return;
+            }
+
             const formData = new FormData();
             formData.append("audio", audio);
             formData.append("user_id", userId);
+            formData.append("user_predict", userPredict);
             if (hiveId) {
                 formData.append("hive_id", hiveId);
             }
