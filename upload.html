@@ -126,7 +126,8 @@
                     return;
                 }
 
-                const hivesResponse = await fetch(`${API_URL}/hives?user_id=${userId}`);
+                const farmId = farmData.farm_id; // Extract farm_id from farmData
+                const hivesResponse = await fetch(`${API_URL}/hives?farm_id=${farmId}`);
                 const hives = await hivesResponse.json();
 
                 const hiveSelect = document.getElementById("hiveSelect");
