@@ -176,7 +176,7 @@
             formData.append("health_status", healthStatus);
 
             try {
-                const response = await fetch(`${API_URL}//manual_health_update`, {
+                const response = await fetch(`${API_URL}/manual_health_update`, {
                     method: "POST",
                     body: formData
                 });
