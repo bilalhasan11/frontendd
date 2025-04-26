@@ -79,14 +79,12 @@
 <body>
     <div class="navbar">
         <a href="upload.html">Upload</a>
-		<a href="manual_health.html">Manual Health</a>
+        <a href="manual_health.html">Manual Health</a>
         <a href="history.html">History</a>
         <a href="profile.html">Profile</a>
         <a href="farm.html">Farm</a>
         <a href="hive_management.html">Hive</a>
         <a href="#" onclick="logout()">Logout</a>
-		
-		
     </div>
 
     <div class="container">
@@ -171,14 +169,18 @@
             loader.style.display = "block";
             resultDiv.innerText = "";
 
-            const formData = new FormData();
-            formData.append("hive_id", hiveId);
-            formData.append("health_status", healthStatus);
+            const payload = {
+                hive_id: hiveId,
+                health_status: healthStatus
+            };
 
             try {
                 const response = await fetch(`${API_URL}/manual_health_update`, {
                     method: "POST",
-                    body: formData
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
                 });
                 const result = await response.json();
 
