@@ -1,81 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Health Predictor</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            text-align: center;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Health Predictor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      text-align: center;
+    }
 
-        .container {
-            width: 90%;
-            max-width: 400px;
-            margin: 50px auto;
-            background: white;
-            padding: 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-        }
+    .container {
+      width: 90%;
+      max-width: 400px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
 
-        h1 {
-            color: #4CAF50;
-        }
+    h1 {
+      color: #4CAF50;
+    }
 
-        input, button {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+    input, button {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-        button {
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-            border: none;
-        }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
 
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .google-btn {
+      background-color: #4285F4;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .google-btn:hover {
+      background-color: #357AE8;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Login</h1>
-        <input type="email" id="loginemail" placeholder="Email" required>
-        <input type="password" id="loginPassword" placeholder="Password" required>
-        <button onclick="login()">Login</button>
-        <p>Don't have an account? <a href="signup.html">Signup</a></p>
-    </div>
+  <div class="container">
+    <h1>Login</h1>
+    <input type="email" id="loginemail" placeholder="Email" required>
+    <input type="password" id="loginPassword" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+    
+    <p>OR</p>
+    <button class="google-btn" onclick="googleLogin()">Login with Google</button>
 
-    <script>
-        const API_URL = "https://bilalhasanniazi-bee-notbee.hf.space";
+    <p>Don't have an account? <a href="signup.html">Signup</a></p>
+  </div>
 
-        async function login() {
-            const email = document.getElementById("loginemail").value;
-            const password = document.getElementById("loginPassword").value;
-            const response = await fetch(`${API_URL}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
+  <script>
+    const API_URL = "https://bilalhasanniazi-bee-notbee.hf.space";
 
-            const data = await response.json();
-            if (data.user_id) {
-                localStorage.setItem("user_id", data.user_id);
-                window.location.href = "profile.html";
-            } else {
-                alert(data.error);
-            }
-        }
-    </script>
+    async function login() {
+      const email = document.getElementById("loginemail").value;
+      const password = document.getElementById("loginPassword").value;
+      const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+      if (data.user_id) {
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("farm_id", data.farm_id);
+        window.location.href = "profile.html";
+      } else {
+        alert(data.error);
+      }
+    }
+
+    function googleLogin() {
+      // Redirect the user to Google login
+      window.location.href = `${API_URL}/login/google`;
+    }
+  </script>
 </body>
 </html>
