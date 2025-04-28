@@ -45,15 +45,6 @@
         button:hover {
             background-color: #45a049;
         }
-
-        .google-btn {
-            background-color: #4285F4;
-            margin-top: 10px;
-        }
-
-        .google-btn:hover {
-            background-color: #357AE8;
-        }
     </style>
 </head>
 <body>
@@ -62,11 +53,6 @@
         <input type="email" id="loginemail" placeholder="Email" required>
         <input type="password" id="loginPassword" placeholder="Password" required>
         <button onclick="login()">Login</button>
-
-        <p>or</p>
-
-        <button class="google-btn" onclick="googleLogin()">Login with Google</button>
-
         <p>Don't have an account? <a href="signup.html">Signup</a></p>
     </div>
 
@@ -85,43 +71,10 @@
             const data = await response.json();
             if (data.user_id) {
                 localStorage.setItem("user_id", data.user_id);
-                localStorage.setItem("farm_id", data.farm_id);  // Save farm_id too
                 window.location.href = "profile.html";
             } else {
                 alert(data.error);
             }
-        }
-
-        function googleLogin() {
-            // Open Google login in a new window
-            const googleLoginWindow = window.open(`${API_URL}/google/login`, "_blank", "width=500,height=600");
-
-            // Keep checking if the user authenticated
-            const checkLogin = setInterval(async () => {
-                try {
-                    const response = await fetch(`${API_URL}/session/user`, {
-                        credentials: 'include'
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.user_id) {
-                            // Save to localStorage
-                            localStorage.setItem("user_id", data.user_id);
-                            localStorage.setItem("farm_id", data.farm_id);
-
-                            // Close the Google login popup
-                            googleLoginWindow.close();
-                            clearInterval(checkLogin);
-
-                            // Redirect to profile
-                            window.location.href = "profile.html";
-                        }
-                    }
-                } catch (error) {
-                    console.error('Checking session error:', error);
-                }
-            }, 1000); // Check every 1 second
         }
     </script>
 </body>
