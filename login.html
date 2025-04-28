@@ -97,16 +97,16 @@
       window.location.href = `${API_URL}/google/login`;
     }
 
-    // Handle Google auth callback (if redirected back to this page)
+    // Handle Google auth callback
     window.onload = async function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('google_auth')) {
+      // Check if we're on the /google/authorized path (same domain)
+      if (window.location.pathname.includes('/google/authorized')) {
         try {
-          // Fetch user data from backend after Google auth
+          // The backend returns JSON directly, so we rely on the response
           const response = await fetch(`${API_URL}/google/authorized`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-            credentials: 'include' // Include cookies/session
+            credentials: 'include' // Include session cookies
           });
           const data = await response.json();
           if (data.user_id) {
@@ -115,9 +115,11 @@
             window.location.href = "profile.html";
           } else {
             alert(data.error || "Google authentication failed");
+            window.location.href = "login.html"; // Redirect back to login on failure
           }
         } catch (error) {
           alert("Error during Google authentication");
+          window.location.href = "login.html";
         }
       }
     };
